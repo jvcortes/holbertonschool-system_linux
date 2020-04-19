@@ -7,28 +7,51 @@
 #include <time.h>
 #include <pwd.h>
 #include <grp.h>
-#include "strutil.c"
+#include "def.h"
 
 
-typedef struct file_s
+DIR
+*open_directory(char **path)
 {
-	char path[4096];
-	char name[256];
-	char type;
-	char perm[9];
-	char *time;
-	long size;
-	char *user;
-	char *group;
-} File;
+	int trailing_slash = 0;
+	int path_len = 0;
+	char *tmp;
+	DIR *dir;
 
-File **getlist(char *path);
-File **createlist(size_t size);
-int getfilecount(char *path);
+	if (path == NULL || *path == NULL)
+		return (NULL);
 
+	path_len = strlen(*path);
+
+	if (path[0][path_len - 1] != '/')
+		trailing_slash = 1;
+	tmp = malloc(path_len + trailing_slash + 1);
+	if (tmp == NULL)
+	{
+		free(tmp);
+		return (NULL);
+	}
+
+	strncpy(tmp, *path, path_len + trailing_slash + 1);
+	if (trailing_slash)
+		tmp[path_len] = '/';
+	*path = tmp;
+
+	dir = opendir(*path);
+	if (dir == NULL)
+	{
+		fprintf(stderr,
+			"hls: cannot access '%s': No such file or directory\n",
+			*path);
+		free(*path);
+		exit(1);
+	}
+
+	return (dir);
+}
 
 File
-**createlist(size_t size)
+**create_list(size_t size)
 {
 	int i;
 	File **files;
@@ -43,7 +66,8 @@ File
 		return (NULL);
 	}
 
-	for (i = 0; (size_t) i < size; i++)
+	printf("%ld\n", size);
+	for (i = 0; (size_t) i < size - 1; i++)
 	{
 		files[i] = malloc(sizeof(File));
 		if (files[i] == NULL)
@@ -59,27 +83,19 @@ File
 	return (files);
 }
 
-File 
-**getlist(char *path)
+File
+**get_list(char *path)
 {
 	DIR *dir;
 	struct dirent *read;
 	struct stat filestat;
-	ssize_t size = getfilecount(path);
+	ssize_t size = file_count(path);
 	File **files;
 	unsigned int i = 0;
 	char *c;
 
-	files = createlist(size + 1);
-
-	dir = opendir(path);
-	if (dir == NULL)
-	{
-		fprintf(stderr,
-			"hls: cannot access '%s': No such file or directory\n",
-			path);
-		return (NULL);
-	}
+	files = create_list(size + 1);
+	dir = open_directory(&path);
 
 	while ((read = readdir(dir)) != NULL)
 	{
@@ -92,18 +108,32 @@ File
 
 		if ((lstat(files[i]->path, &filestat)) == -1)
 		{
-			exit (2);
+			exit(2);
 		}
 
 		switch (filestat.st_mode & S_IFMT)
 		{
-			case S_IFREG:  files[i]->type = '-'; break;
-			case S_IFDIR:  files[i]->type = 'd'; break;
-			case S_IFCHR:  files[i]->type = 'c'; break;
-			case S_IFBLK:  files[i]->type = 'b'; break;
-			case S_IFIFO:  files[i]->type = 'p'; break;
-			case S_IFLNK:  files[i]->type = 'l'; break;
-			case S_IFSOCK: files[i]->type = 's'; break;
+			case S_IFREG:
+				files[i]->type = '-';
+				break;
+			case S_IFDIR:
+				files[i]->type = 'd';
+				break;
+			case S_IFCHR:
+				files[i]->type = 'c';
+				break;
+			case S_IFBLK:
+				files[i]->type = 'b';
+				break;
+			case S_IFIFO:
+				files[i]->type = 'p';
+				break;
+			case S_IFLNK:
+				files[i]->type = 'l';
+				break;
+			case S_IFSOCK:
+				files[i]->type = 's';
+				break;
 		}
 
 		files[i]->perm[0] = filestat.st_mode & S_IRUSR ? 'r' : '-';
@@ -126,7 +156,7 @@ File
 			files[i]->user = malloc(strlen(c) * sizeof(char));
 			files[i]->user = strncpy(files[i]->user, c, strlen(c));
 		}
-		
+
 		c = getgrgid(filestat.st_uid)->gr_name;
 		if (strlen(c))
 		{
@@ -137,31 +167,42 @@ File
 		i++;
 	}
 
+	free(read);
+	free(dir);
+	free(path);
 	return (files);
 }
 
 int
-getfilecount(char *path)
+file_count(char *path)
 {
 	DIR *dir;
 	struct dirent *read;
 	int count = 0;
 
-	dir = opendir(path);
-	if (dir == NULL)
-	{
-		fprintf(stderr,
-			"hls: cannot access '%s': No such file or directory\n",
-			path);
-		return (-1);
-	}
-
+	dir = open_directory(&path);
 	while ((read = readdir(dir)) != NULL)
 		count++;
 
 	closedir(dir);
 
+	free(path);
 	return (count);
+}
+
+void
+cleanup(File **file_list)
+{
+	int i = 0;
+
+	while (file_list[i] != NULL)
+	{
+		free(file_list[i]->user);
+		free(file_list[i]->group);
+		free(file_list[i++]);
+	}
+
+	free(file_list);
 }
 
 int main(int argc, char *argv[])
@@ -171,7 +212,7 @@ int main(int argc, char *argv[])
 
 	if (argc == 2)
 	{
-		files = getlist(argv[1]);
+		files = get_list(argv[1]);
 		while (files[i] != NULL)
 		{
 			printf("%s", files[i]->name);
@@ -181,6 +222,7 @@ int main(int argc, char *argv[])
 				printf("\n");
 			i++;
 		}
+		cleanup(files);
 	}
 
 	return (0);

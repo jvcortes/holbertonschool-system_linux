@@ -1,3 +1,6 @@
+#ifndef LS
+#define LS
+
 #include <stdlib.h>
 #include <dirent.h>
 
@@ -24,3 +27,5 @@ void cleanup(File **file_list);
 int _strlen(char *s);
 char *_strncat(char *dest, char *src, int n);
 char *_strncpy(char *dest, char *src, int n);
+
+#endif /* ifndef LS */

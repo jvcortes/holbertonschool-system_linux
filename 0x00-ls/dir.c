@@ -31,7 +31,7 @@ DIR
 	if (path == NULL || *path == NULL)
 		return (NULL);
 
-	path_len = strlen(*path);
+	path_len = _strlen(*path);
 
 	if (path[0][path_len - 1] != '/')
 		trailing_slash = 1;

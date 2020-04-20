@@ -12,27 +12,20 @@
  */
 int main(int argc, char *argv[])
 {
-	File **files;
-	int i = 0;
+	char **short_filelist;
 
 	if (argc == 1)
 	{
-		files = get_list("./", 0);
+		short_filelist = get_shortlist("./", 0);
+		print_shortlist(short_filelist);
+		cleanup_shortlist(short_filelist);
 	}
 	else
 	{
-		files = get_list(argv[1], 0);
+		short_filelist = get_shortlist(argv[1], 0);
+		print_shortlist(short_filelist);
+		cleanup_shortlist(short_filelist);
 	}
-	while (files[i] != NULL)
-	{
-		printf("%s", files[i]->name);
-		if (files[i + 1])
-			printf("  ");
-		else
-			printf("\n");
-		i++;
-	}
-	cleanup(files);
 
 	return (0);
 }

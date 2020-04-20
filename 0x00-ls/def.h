@@ -22,6 +22,9 @@ DIR *open_directory(char **path);
 int file_count(char *path, int hidden);
 void cleanup(File **file_list);
 
+char **get_shortlist(char *path, int hidden);
+void print_shortlist(char **list);
+void cleanup_shortlist(char **list);
 
 /* definitions for string utilities */
 int _strlen(char *s);

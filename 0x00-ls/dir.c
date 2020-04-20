@@ -3,7 +3,6 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 #include <pwd.h>
 #include <grp.h>
@@ -54,6 +53,7 @@ DIR
 			"hls: cannot access '%s': No such file or directory\n",
 			*path);
 		free(*path);
+		free(dir);
 		exit(1);
 	}
 

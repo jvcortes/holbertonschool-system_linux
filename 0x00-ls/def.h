@@ -1,4 +1,5 @@
-#include <stdio.h>
+#include <stdlib.h>
+#include <dirent.h>
 
 typedef struct File
 {
@@ -14,7 +15,9 @@ typedef struct File
 
 File **get_list(char *path);
 File **create_list(size_t size);
+DIR *open_directory(char **path);
 int file_count(char *path);
+void cleanup(File **file_list);
 
 
 /* definitions for string utilities */

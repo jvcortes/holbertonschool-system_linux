@@ -207,6 +207,7 @@ File
 /**
  * file_count - counts the files and directories inside a directory.
  * @path: path to the directory.
+ * @hidden: count hidden files.
  *
  * Return: file/directory count, if the open_directory() call fails,
  * the function will return -1.

@@ -9,6 +9,7 @@
 #include <grp.h>
 #include "def.h"
 
+
 /**
  * open_directory - wrapper function, opens a directory stream using
  * opendir(), copies the path to a new allocated memory adress and
@@ -41,7 +42,7 @@ DIR
 		return (NULL);
 	}
 
-	strncpy(tmp, *path, path_len + trailing_slash + 1);
+	_strncpy(tmp, *path, path_len + trailing_slash + 1);
 	if (trailing_slash)
 		tmp[path_len] = '/';
 	*path = tmp;
@@ -83,7 +84,6 @@ File
 		return (NULL);
 	}
 
-	printf("%ld\n", size);
 	for (i = 0; (size_t) i < size - 1; i++)
 	{
 		files[i] = malloc(sizeof(File));
@@ -91,6 +91,7 @@ File
 		{
 			while (i >= 0)
 				free(files[i--]);
+			free(files);
 			return (NULL);
 		}
 	}
@@ -123,12 +124,9 @@ File
 
 	while ((read = readdir(dir)) != NULL)
 	{
-		memcpy(files[i]->name, read->d_name, strlen(read->d_name));
-		files[i]->name[strlen(read->d_name)] = '\0';
-		memcpy(files[i]->path, path, strlen(path));
-		files[i]->path[strlen(path)] = '\0';
-		strncat(files[i]->path, files[i]->name, strlen(files[i]->name));
-		files[i]->path[strlen(files[i]->path)] = '\0';
+		_strncpy(files[i]->name, read->d_name, sizeof(files[i]->name) - 1);
+		_strncpy(files[i]->path, path, sizeof(files[i]->path) - 1);
+		_strncat(files[i]->path, files[i]->name, sizeof(files[i]->path) - _strlen(files[i]->path) - 1);
 
 		if ((lstat(files[i]->path, &filestat)) == -1)
 		{
@@ -175,23 +173,22 @@ File
 		files[i]->size = filestat.st_size;
 
 		c = getpwuid(filestat.st_uid)->pw_name;
-		if (strlen(c))
+		if (_strlen(c))
 		{
-			files[i]->user = malloc(strlen(c) * sizeof(char));
-			files[i]->user = strncpy(files[i]->user, c, strlen(c));
+			files[i]->user = malloc(_strlen(c) * sizeof(char));
+			files[i]->user = _strncpy(files[i]->user, c, _strlen(c));
 		}
 
 		c = getgrgid(filestat.st_uid)->gr_name;
-		if (strlen(c))
+		if (_strlen(c))
 		{
-			files[i]->group = malloc(strlen(c) * sizeof(char));
-			files[i]->group = strncpy(files[i]->group, c, strlen(c));
+			files[i]->group = malloc(_strlen(c) * sizeof(char));
+			files[i]->group = _strncpy(files[i]->group, c, _strlen(c));
 		}
 
 		i++;
 	}
 
-	free(read);
 	free(dir);
 	free(path);
 	return (files);

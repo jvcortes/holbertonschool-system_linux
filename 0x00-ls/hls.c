@@ -17,11 +17,11 @@ int main(int argc, char *argv[])
 
 	if (argc == 1)
 	{
-		files = get_list("./");
+		files = get_list("./", 0);
 	} 
 	else
 	{
-		files = get_list(argv[1]);
+		files = get_list(argv[1], 0);
 	}
 	while (files[i] != NULL)
 	{

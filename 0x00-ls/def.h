@@ -16,10 +16,10 @@ typedef struct File
 	char *group;
 } File;
 
-File **get_list(char *path);
+File **get_list(char *path, int hidden);
 File **create_list(size_t size);
 DIR *open_directory(char **path);
-int file_count(char *path);
+int file_count(char *path, int hidden);
 void cleanup(File **file_list);
 
 

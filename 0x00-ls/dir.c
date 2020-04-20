@@ -104,17 +104,18 @@ File
 /**
  * get_list - populates an array of File instances using a directory stream.
  * @path: path to the directory.
+ * @hidden: list hidden files and directories.
  *
  * Return: pointer to the array. If memory allocation fails for any of the File
  * struct members, the function will return a null pointer.
  */
 File
-**get_list(char *path)
+**get_list(char *path, int hidden)
 {
 	DIR *dir;
 	struct dirent *read;
 	struct stat filestat;
-	ssize_t size = file_count(path);
+	ssize_t size = file_count(path, hidden);
 	File **files;
 	unsigned int i = 0;
 	char *c;
@@ -124,9 +125,18 @@ File
 
 	while ((read = readdir(dir)) != NULL)
 	{
+		if (!hidden)
+		{
+			if (read->d_name[0] == '.')
+				continue;
+		}
 		_strncpy(files[i]->name, read->d_name, sizeof(files[i]->name) - 1);
 		_strncpy(files[i]->path, path, sizeof(files[i]->path) - 1);
-		_strncat(files[i]->path, files[i]->name, sizeof(files[i]->path) - _strlen(files[i]->path) - 1);
+		_strncat(
+			files[i]->path,
+			files[i]->name,
+			sizeof(files[i]->path) - _strlen(files[i]->path) - 1
+		);
 
 		if ((lstat(files[i]->path, &filestat)) == -1)
 		{
@@ -169,7 +179,7 @@ File
 		files[i]->perm[8] = filestat.st_mode & S_IROTH ? 'x' : '-';
 
 		files[i]->time = ctime(&(filestat.st_mtime));
-		files[i]->time[strlen(files[i]->time) - 9] = '\0';
+		files[i]->time[_strlen(files[i]->time) - 9] = '\0';
 		files[i]->size = filestat.st_size;
 
 		c = getpwuid(filestat.st_uid)->pw_name;
@@ -202,7 +212,7 @@ File
  * the function will return -1.
  */
 int
-file_count(char *path)
+file_count(char *path, int hidden)
 {
 	DIR *dir;
 	struct dirent *read;
@@ -213,7 +223,15 @@ file_count(char *path)
 		return (-1);
 
 	while ((read = readdir(dir)) != NULL)
-		count++;
+		if (!hidden)
+		{
+			if (read->d_name[0] != '.')
+				count++;
+		}
+		else
+		{
+			count++;
+		}
 
 	closedir(dir);
 

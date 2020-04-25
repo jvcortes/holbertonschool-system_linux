@@ -56,6 +56,29 @@ char
 }
 
 /**
+ * create_array - creates a null terminated array of char pointers.
+ * @size: size of the array
+ *
+ * Return: pointer to the array, if memory allocation falis, the function will
+ * return a null pointer.
+ */
+char
+**create_list(ssize_t size)
+{
+	char **list = malloc(size * sizeof(char *) + sizeof(char *));
+
+	if (list == NULL)
+	{
+		free(list);
+		return (NULL);
+	}
+
+	list[size] = NULL;
+
+	return (list);
+}
+
+/**
  * print_shortlist - prints a array of file names.
  * @list: pointer to the array.
  *

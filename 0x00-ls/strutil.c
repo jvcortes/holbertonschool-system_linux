@@ -1,3 +1,4 @@
+#include <stdlib.h>
 
 /**
  * _strlen - returns the length of a string
@@ -5,7 +6,7 @@
  *
  * Return: length of the string.
  */
-int _strlen(char *s)
+int _strlen(const char *s)
 {
 	int i;
 
@@ -41,13 +42,13 @@ char *_strncat(char *dest, char *src, int n)
 }
 
 /**
- * _strncpy - copies the n bytes of a string to another string
+ * _strncpy - copies a string
  * @dest: string to hold the copy
  * @src: string to be copied
  * @n: amount of bytes to be copied from the source string
  * Return: dest, the copied string
  */
-char *_strncpy(char *dest, char *src, int n)
+char *_strncpy(char *dest, const char *src, int n)
 {
 	int i, j;
 
@@ -63,4 +64,23 @@ char *_strncpy(char *dest, char *src, int n)
 		for (; j < n; j++)
 			dest[j] = '\0';
 	return (dest);
+}
+
+/**
+ * _strdup - duplicates a string.
+ * @s: pointer to the string.
+ *
+ * Return: pointer to the newly allocated string duplicate.
+ */
+char *_strdup(const char *s)
+{
+	size_t len = _strlen(s) + 1;
+	char *new = malloc(len);
+	if (new == NULL)
+	{
+		free(new);
+		return (NULL);
+	}
+
+	return _strncpy(new, s, len);
 }

@@ -50,7 +50,7 @@ DIR
 	if (dir == NULL)
 	{
 		fprintf(stderr,
-			"hls: cannot access '%s': No such file or directory\n",
+			"hls: cannot access '%s':",
 			*path);
 		free(*path);
 		free(dir);
@@ -61,7 +61,7 @@ DIR
 }
 
 /**
- * create_list - creates a dynamically allocated array of pointers to File
+ * create_long_list - creates a dynamically allocated array of pointers to File
  * instances. Contains a null pointer at its end.
  * @size: size of the list, has to include the size for the null pointer.
  *
@@ -69,7 +69,7 @@ DIR
  * the function will return a null pointer.
  */
 File
-**create_list(size_t size)
+**create_long_list(size_t size)
 {
 	int i;
 	File **files;
@@ -120,7 +120,7 @@ File
 	unsigned int i = 0;
 	char *c;
 
-	files = create_list(size + 1);
+	files = create_long_list(size + 1);
 	dir = open_directory(&path);
 
 	while ((read = readdir(dir)) != NULL)

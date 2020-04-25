@@ -76,11 +76,12 @@ char *_strdup(const char *s)
 {
 	size_t len = _strlen(s) + 1;
 	char *new = malloc(len);
+
 	if (new == NULL)
 	{
 		free(new);
 		return (NULL);
 	}
 
-	return _strncpy(new, s, len);
+	return (_strncpy(new, s, len));
 }

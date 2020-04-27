@@ -49,10 +49,10 @@ print_file(char *file)
 int
 is_file(char *path)
 {
+	struct stat filestat;
+
 	if (path == NULL)
 		return (0);
-
-	struct stat filestat;
 
 	if ((lstat(path, &filestat)) == -1)
 		return (0);

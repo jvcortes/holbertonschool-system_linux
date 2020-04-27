@@ -15,18 +15,21 @@ print_single(char *path)
 	char *file;
 	char **short_filelist;
 
-	file = get_file(path);
-	if (file)
+	if (path_exists(path))
 	{
-		print_file(file);
-		printf("\n");
-		free(file);
-	}
-	else
-	{
-		short_filelist = get_shortlist(path, 0);
-		print_shortlist(short_filelist);
-		cleanup_shortlist(short_filelist);
+		file = get_file(path);
+		if (file)
+		{
+			print_file(file);
+			printf("\n");
+			free(file);
+		}
+		else if (can_read_dir(path))
+		{
+			short_filelist = get_shortlist(path, 0);
+			print_shortlist(short_filelist);
+			cleanup_shortlist(short_filelist);
+		}
 	}
 }
 
@@ -35,30 +38,27 @@ print_single(char *path)
  * array. Paths containing folders will not be taken into account.
  * @arr: pointer to the array.
  * @size: size of the array.
+ * @count: number of files to print from the array.
  *
  * Return: nothing.
  */
 void
-print_files(char **arr, size_t size)
+print_files(char **arr, size_t size, size_t count)
 {
-	int i, j, file_count = 0;
+	int i, j;
 
-	for (i = 0; i < (int) size; i++)
-		if (is_file(arr[i]))
-			file_count++;
-
-	if (file_count)
+	if (count)
 	{
 		for (i = 0, j = 0; i < (int) size; i++)
 		{
 			if (is_file(arr[i]))
 			{
 				print_file(arr[i]);
-				if (++j < file_count)
+				if (++j < (int) count)
 					printf("  ");
 			}
 		}
-		printf("\n\n");
+		printf("\n");
 	}
 }
 
@@ -68,31 +68,29 @@ print_files(char **arr, size_t size)
  * account.
  * @arr: pointer to the array.
  * @size: size of the array.
+ * @count: number of directories to print from the array.
  *
  * Return: nothing.
  */
 void
-print_directories(char **arr, size_t size)
+print_directories(char **arr, size_t size, size_t count)
 {
-	int i, j, dir_count = 0;
+	int i, j;
 	char **list = NULL;
-
-	for (i = 0; i < (int) size; i++)
-		if (!is_file(arr[i]))
-			dir_count++;
 
 	for (i = 0, j = 0; i < (int) size; i++)
 	{
-		if (!is_file(arr[i]))
+		if (!is_file(arr[i]) && can_read_dir(arr[i]))
 		{
 			list = get_shortlist(arr[i], 0);
 			if (list)
 			{
+				if (j > 0 && j < (int) count)
+					printf("\n");
 				printf("%s:\n", arr[i]);
 				print_shortlist(list);
 				cleanup_shortlist(list);
-				if (++j < dir_count)
-					printf("\n");
+				j++;
 			}
 		}
 	}
@@ -108,8 +106,33 @@ print_directories(char **arr, size_t size)
 void
 print_many(char **arr, size_t size)
 {
-	print_files(arr, size);
-	print_directories(arr, size);
+	int i = 0, file_count = 0, dir_count = 0;
+
+	while (i < (int) size)
+	{
+		if (path_exists(arr[i]))
+		{
+			if (is_file(arr[i]))
+			{
+				file_count++;
+			}
+			else
+			{
+				dir_count++;
+			}
+		}
+		i++;
+	}
+
+	if (file_count)
+		print_files(arr, size, file_count);
+
+	if (dir_count)
+	{
+		if (file_count)
+			printf("\n");
+		print_directories(arr, size, dir_count);
+	}
 }
 
 
@@ -128,5 +151,5 @@ int main(int argc, char *argv[])
 		print_single(argv[1]);
 	else
 		print_many((argv + 1), argc - 1);
-	return (0);
+	return (status(-1));
 }

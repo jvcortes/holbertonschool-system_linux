@@ -23,7 +23,7 @@ char
 	ssize_t size = file_count(path, hidden);
 	unsigned int i = 0;
 
-	dir = open_directory(&path);
+	dir = open_directory(path);
 	files = malloc(size * sizeof(char *) + sizeof(char *));
 	if (files == NULL)
 	{
@@ -51,7 +51,6 @@ char
 	files[i] = NULL;
 
 	free(dir);
-	free(path);
 	return (files);
 }
 

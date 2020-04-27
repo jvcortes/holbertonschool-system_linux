@@ -20,39 +20,16 @@
  * the function will exit with status 1.
  */
 DIR
-*open_directory(char **path)
+*open_directory(char *path)
 {
-	int trailing_slash = 0;
-	int path_len = 0;
-	char *tmp;
 	DIR *dir;
 
-	if (path == NULL || *path == NULL)
+	if (path == NULL)
 		return (NULL);
 
-	path_len = _strlen(*path);
-
-	if (path[0][path_len - 1] != '/')
-		trailing_slash = 1;
-	tmp = malloc(path_len + trailing_slash + 1);
-	if (tmp == NULL)
-	{
-		free(tmp);
-		return (NULL);
-	}
-
-	_strncpy(tmp, *path, path_len + trailing_slash + 1);
-	if (trailing_slash)
-		tmp[path_len] = '/';
-	*path = tmp;
-
-	dir = opendir(*path);
+	dir = opendir(path);
 	if (dir == NULL)
 	{
-		fprintf(stderr,
-			"hls: cannot access '%s':",
-			*path);
-		free(*path);
 		free(dir);
 		exit(1);
 	}
@@ -121,7 +98,7 @@ File
 	char *c;
 
 	files = create_long_list(size + 1);
-	dir = open_directory(&path);
+	dir = open_directory(path);
 
 	while ((read = readdir(dir)) != NULL)
 	{
@@ -200,7 +177,6 @@ File
 	}
 
 	free(dir);
-	free(path);
 	return (files);
 }
 
@@ -219,7 +195,7 @@ file_count(char *path, int hidden)
 	struct dirent *read;
 	int count = 0;
 
-	dir = open_directory(&path);
+	dir = open_directory(path);
 	if (dir == NULL)
 		return (-1);
 
@@ -236,7 +212,6 @@ file_count(char *path, int hidden)
 
 	closedir(dir);
 
-	free(path);
 	return (count);
 }
 

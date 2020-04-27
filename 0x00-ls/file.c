@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include "def.h"
 
 
@@ -51,10 +52,77 @@ is_file(char *path)
 	struct stat filestat;
 
 	if ((lstat(path, &filestat)) == -1)
-		exit(1);
+		return (0);
 
 	if ((filestat.st_mode & S_IFMT) == S_IFDIR)
 		return (0);
 
+	return (1);
+}
+
+/**
+ * path_exists - checks if a path exists in the filesystem
+ * @path: path.
+ *
+ * Return: non-zero value, if the given path doesn't exist, the function will
+ * return zero and will set this program's return code to two.
+ */
+int
+path_exists(char *path)
+{
+	int errno;
+	char *errmsg;
+	struct stat filestat;
+
+	if ((lstat(path, &filestat)) == -1)
+	{
+		if (errno == ENOENT)
+		{
+			errmsg = malloc(_strlen("hls: cannot access ") + _strlen(path));
+			sprintf(errmsg,
+				"hls: cannot access %s",
+				path
+			);
+			perror(errmsg);
+			free(errmsg);
+		}
+		status(2);
+		return (0);
+	}
+
+	return (1);
+}
+
+/**
+ * can_read_dir - determines if the current user can read a directory.
+ * @path: path to the directory.
+ *
+ * Return: non-zero value, if the given directory path cannot be read, the
+ * function will return zero and will set this program's exit status to two.
+ */
+int
+can_read_dir(char *path)
+{
+	int errno;
+	char *errmsg;
+	DIR *dir;
+
+	dir = opendir(path);
+	if (dir == NULL)
+	{
+		if (errno == EACCES)
+		{
+			errmsg = malloc(_strlen("hls: cannot open directory ") + _strlen(path));
+			sprintf(errmsg,
+				"hls: cannot open directory %s",
+				path
+			);
+			perror(errmsg);
+			free(errmsg);
+		}
+		status(2);
+		return (0);
+	}
+	free(dir);
 	return (1);
 }

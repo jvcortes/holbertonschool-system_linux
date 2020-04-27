@@ -78,7 +78,7 @@ path_exists(char *path)
 	{
 		if (errno == ENOENT)
 		{
-			errmsg = malloc(_strlen("hls: cannot access ") + _strlen(path));
+			errmsg = malloc(_strlen("hls: cannot access ") + _strlen(path) + 1);
 			sprintf(errmsg,
 				"hls: cannot access %s",
 				path
@@ -112,7 +112,7 @@ can_read_dir(char *path)
 	{
 		if (errno == EACCES)
 		{
-			errmsg = malloc(_strlen("hls: cannot open directory ") + _strlen(path));
+			errmsg = malloc(_strlen("hls: cannot open directory ") + _strlen(path) + 1);
 			sprintf(errmsg,
 				"hls: cannot open directory %s",
 				path

@@ -6,7 +6,7 @@
 #define SIZE 256
 
 /**
- * get_shortlist - creates and fills an array containing the file
+ * get_list - creates and fills an array containing the file
  * names inside a directory.
  * @path: path to the directory.
  * @hidden: retrieve hidden files.
@@ -15,7 +15,7 @@
  * function will return a null pointer.
  */
 char
-**get_shortlist(char *path, int hidden)
+**get_list(char *path, int hidden)
 {
 	DIR *dir;
 	struct dirent *read;
@@ -62,7 +62,7 @@ char
  * return a null pointer.
  */
 char
-**create_list(ssize_t size)
+**create_array(ssize_t size)
 {
 	char **list = malloc(size * sizeof(char *) + sizeof(char *));
 
@@ -78,35 +78,49 @@ char
 }
 
 /**
- * print_shortlist - prints a array of file names.
+ * print_list - prints a array of file names.
  * @list: pointer to the array.
  *
  * Return: nothing.
  */
 void
-print_shortlist(char **list)
+print_list(char **list)
 {
 	int i = 0;
 
-	while (list[i])
+	switch (set_opt("listing", -1))
 	{
-		printf("%s", list[i]);
-		if (list[i + 1] == NULL)
-			printf("\n");
-		else
-			printf("  ");
-		i++;
+		case DEFAULT_LISTING:
+			while (list[i])
+			{
+				printf("%s", list[i]);
+				if (list[i + 1] == NULL)
+					printf("\n");
+				else
+					printf("  ");
+				i++;
+			}
+			break;
+		case VERTICAL_LISTING:
+			while (list[i])
+			{
+				printf("%s", list[i]);
+				if (list[i] != NULL)
+					printf("\n");
+				i++;
+			}
+			break;
 	}
 }
 
 /**
- * print_shortlist - frees a array of file names.
+ * cleanup_list - frees a array of file names.
  * @arr: pointer to the array.
  *
  * Return: nothing.
  */
 void
-cleanup_shortlist(char **arr)
+cleanup_list(char **arr)
 {
 	int i = 0;
 

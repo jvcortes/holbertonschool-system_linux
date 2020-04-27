@@ -49,6 +49,9 @@ print_file(char *file)
 int
 is_file(char *path)
 {
+	if (path == NULL)
+		return (0);
+
 	struct stat filestat;
 
 	if ((lstat(path, &filestat)) == -1)
@@ -73,6 +76,9 @@ path_exists(char *path)
 	int errno;
 	char *errmsg;
 	struct stat filestat;
+
+	if (path == NULL)
+		return (0);
 
 	if ((lstat(path, &filestat)) == -1)
 	{
@@ -106,6 +112,9 @@ can_read_dir(char *path)
 	int errno;
 	char *errmsg;
 	DIR *dir;
+
+	if (path == NULL)
+		return (0);
 
 	dir = opendir(path);
 	if (dir == NULL)

@@ -18,3 +18,20 @@ int status(int num)
 
 	return (status);
 }
+
+int set_opt(char *opt, int num)
+{
+	static Opt opts = {
+		.vertical_listing = DEFAULT_LISTING
+	};
+
+	if (!_strcmp(opt, "listing"))
+	{
+		if (num != -1)
+			opts.vertical_listing = num;
+		else
+			return (opts.vertical_listing);
+	}
+
+	return (0);
+}

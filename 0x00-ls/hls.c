@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include "def.h"
 
-
 /**
  * print_single - prints a single entry if it is present in the filesystem
  * @path: entry path.
@@ -26,9 +25,9 @@ print_single(char *path)
 		}
 		else if (can_read_dir(path))
 		{
-			short_filelist = get_shortlist(path, 0);
-			print_shortlist(short_filelist);
-			cleanup_shortlist(short_filelist);
+			short_filelist = get_list(path, 0);
+			print_list(short_filelist);
+			cleanup_list(short_filelist);
 		}
 	}
 }
@@ -47,19 +46,36 @@ print_files(char **arr, size_t size, size_t count)
 {
 	int i, j;
 
-	if (count)
+	if (!count)
+		return;
+
+	switch (set_opt("listing", -1))
 	{
-		for (i = 0, j = 0; i < (int) size; i++)
-		{
-			if (is_file(arr[i]))
+		case DEFAULT_LISTING:
+			for (i = 0, j = 0; i < (int) size; i++)
 			{
-				print_file(arr[i]);
-				if (++j < (int) count)
-					printf("  ");
+				if (is_file(arr[i]))
+				{
+					print_file(arr[i]);
+					if (++j < (int) count)
+						printf("  ");
+				}
 			}
-		}
-		printf("\n");
+			break;
+		case VERTICAL_LISTING:
+			for (i = 0, j = 0; i < (int) size; i++)
+			{
+				if (is_file(arr[i]))
+				{
+					print_file(arr[i]);
+					if (++j < (int) count)
+						printf("\n");
+				}
+			}
+			break;
 	}
+	printf("\n");
+
 }
 
 /**
@@ -82,14 +98,14 @@ print_directories(char **arr, size_t size, size_t count)
 	{
 		if (!is_file(arr[i]) && can_read_dir(arr[i]))
 		{
-			list = get_shortlist(arr[i], 0);
+			list = get_list(arr[i], 0);
 			if (list)
 			{
 				if (j > 0 && j < (int) count)
 					printf("\n");
 				printf("%s:\n", arr[i]);
-				print_shortlist(list);
-				cleanup_shortlist(list);
+				print_list(list);
+				cleanup_list(list);
 				j++;
 			}
 		}
@@ -135,7 +151,6 @@ print_many(char **arr, size_t size)
 	}
 }
 
-
 /**
  * main - entry point.
  * @argc: argument count.
@@ -145,6 +160,17 @@ print_many(char **arr, size_t size)
  */
 int main(int argc, char *argv[])
 {
+	int i;
+
+	for (i = 0; i < argc; i++)
+	{
+		if (!_strcmp(argv[i], "-1"))
+		{
+			set_opt("listing", VERTICAL_LISTING);
+			argv[i] = NULL;
+		}
+	}
+
 	if (argc == 1)
 		print_single("./");
 	else if (argc == 2)

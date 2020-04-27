@@ -79,7 +79,9 @@ File
 }
 
 /**
- * get_list - populates an array of File instances using a directory stream.
+ * get_long_list - populates an array of File instances using a
+ * directory stream.
+ *
  * @path: path to the directory.
  * @hidden: list hidden files and directories.
  *
@@ -87,7 +89,7 @@ File
  * struct members, the function will return a null pointer.
  */
 File
-**get_list(char *path, int hidden)
+**get_long_list(char *path, int hidden)
 {
 	DIR *dir;
 	struct dirent *read;

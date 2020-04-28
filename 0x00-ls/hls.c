@@ -2,32 +2,6 @@
 #include <stdlib.h>
 #include "def.h"
 
-/**
- * print_single - prints a single entry if it is present in the filesystem
- * @path: entry path.
- *
- * Return: nothing.
- */
-void
-print_single(char *path)
-{
-	char *file;
-
-	if (path_exists(path))
-	{
-		file = get_file(path);
-		if (file)
-		{
-			print_file(file);
-			printf("\n");
-			free(file);
-		}
-		else if (can_read_dir(path))
-		{
-			print_directory(path, 0);
-		}
-	}
-}
 
 /**
  * print_files - prints the associated files with every path in a provided
@@ -86,7 +60,7 @@ print_files(char **arr, size_t size, size_t count)
  * Return: nothing.
  */
 void
-print_directories(char **arr, size_t size, size_t count)
+print_directories(char **arr, size_t size, size_t count, size_t dir_count)
 {
 	int i, j;
 	char **list = NULL;
@@ -98,7 +72,7 @@ print_directories(char **arr, size_t size, size_t count)
 			list = get_list(arr[i], 0);
 			if (list)
 			{
-				if (j > 0 && j < (int) count)
+				if (j > 0 && j < (int) dir_count)
 					printf("\n");
 				if (count > 1)
 					printf("%s:\n", arr[i]);
@@ -120,10 +94,12 @@ print_directories(char **arr, size_t size, size_t count)
 void
 print_many(char **arr, size_t size)
 {
-	int i = 0, file_count = 0, dir_count = 0;
+	int i = 0, count = 0, file_count = 0, dir_count = 0;
 
 	while (i < (int) size)
 	{
+		if (arr[i])
+			count++;
 		if (path_exists(arr[i]))
 		{
 			if (is_file(arr[i]))
@@ -143,9 +119,9 @@ print_many(char **arr, size_t size)
 
 	if (dir_count)
 	{
-		if (file_count)
+		if (count && file_count)
 			printf("\n");
-		print_directories(arr, size, dir_count);
+		print_directories(arr, size, count, dir_count);
 	}
 
 	if (!file_count && !dir_count && !status(RETRIEVE_STATUS))

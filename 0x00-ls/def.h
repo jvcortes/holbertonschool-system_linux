@@ -63,7 +63,12 @@ int can_read_dir(char *path);
 void print_single(char *path);
 void print_many(char **arr, size_t size);
 void print_files(char **arr, size_t size, size_t count);
-void print_directories(char **arr, size_t size, size_t count);
+void print_directories(
+		char **arr,
+		size_t size,
+		size_t count,
+		size_t dir_count
+);
 
 /* definitions for string utilities */
 int _strlen(const char *s);

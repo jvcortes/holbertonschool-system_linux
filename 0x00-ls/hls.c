@@ -12,7 +12,6 @@ void
 print_single(char *path)
 {
 	char *file;
-	char **short_filelist;
 
 	if (path_exists(path))
 	{
@@ -25,9 +24,7 @@ print_single(char *path)
 		}
 		else if (can_read_dir(path))
 		{
-			short_filelist = get_list(path, 0);
-			print_list(short_filelist);
-			cleanup_list(short_filelist);
+			print_directory(path, 0);
 		}
 	}
 }
@@ -103,7 +100,8 @@ print_directories(char **arr, size_t size, size_t count)
 			{
 				if (j > 0 && j < (int) count)
 					printf("\n");
-				printf("%s:\n", arr[i]);
+				if (count > 1)
+					printf("%s:\n", arr[i]);
 				print_list(list);
 				cleanup_list(list);
 				j++;
@@ -149,6 +147,9 @@ print_many(char **arr, size_t size)
 			printf("\n");
 		print_directories(arr, size, dir_count);
 	}
+
+	if (!file_count && !dir_count)
+		print_directory("./", 0);
 }
 
 /**
@@ -160,22 +161,7 @@ print_many(char **arr, size_t size)
  */
 int main(int argc, char *argv[])
 {
-	int i;
-
-	for (i = 0; i < argc; i++)
-	{
-		if (!_strcmp(argv[i], "-1"))
-		{
-			set_opt("listing", VERTICAL_LISTING);
-			argv[i] = NULL;
-		}
-	}
-
-	if (argc == 1)
-		print_single("./");
-	else if (argc == 2)
-		print_single(argv[1]);
-	else
-		print_many((argv + 1), argc - 1);
+	check_opts(argv, argc);
+	print_many((argv + 1), argc - 1);
 	return (status(-1));
 }

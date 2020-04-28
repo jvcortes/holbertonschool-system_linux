@@ -16,16 +16,38 @@ typedef struct File
 	char *group;
 } File;
 
-typedef struct Option
+typedef struct Settings
 {
 	int vertical_listing;
-} Opt;
+} Settings;
+
+typedef struct Flag
+{
+	char *name;
+	char *long_name;
+	char *option;
+	int value;
+} Flag;
+
+#define DEFAULT_LISTING 0
+#define VERTICAL_LISTING 1
+
+#define LIST_HIDDEN 1
+#define LIST_ALMOST_ALL 1
+
+#define ARGS { \
+		{"-1", "", "listing", VERTICAL_LISTING},\
+		{NULL, NULL, NULL, 0}\
+	}
+
 
 File **get_long_list(char *path, int hidden);
 File **create_long_list(size_t size);
+void cleanup(File **file_list);
+
 DIR *open_directory(char *path);
 int file_count(char *path, int hidden);
-void cleanup(File **file_list);
+void print_directory(char *path, int hidden);
 
 char **create_array(ssize_t size);
 char **get_list(char *path, int hidden);
@@ -53,8 +75,7 @@ int _strcmp(char *s1, char *s2);
 /* definitions for runtime and error handling utilities */
 int status(int num);
 int set_opt(char *opt, int num);
+void check_opts(char *args[], int argc);
 
-#define DEFAULT_LISTING 0
-#define VERTICAL_LISTING 1
 
 #endif /* ifndef LS */

@@ -66,7 +66,7 @@ File
 	DIR *dir;
 	struct dirent *read;
 	struct stat filestat;
-	ssize_t size = file_count(path, hidden);
+	ssize_t size = file_count(path);
 	File **files;
 	unsigned int i = 0;
 	char *c;

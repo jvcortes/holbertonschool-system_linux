@@ -19,6 +19,7 @@ typedef struct File
 typedef struct Settings
 {
 	int vertical_listing;
+	int visibility;
 } Settings;
 
 typedef struct Flag
@@ -32,11 +33,13 @@ typedef struct Flag
 #define DEFAULT_LISTING 0
 #define VERTICAL_LISTING 1
 
+#define LIST_VISIBLE 0
 #define LIST_HIDDEN 1
-#define LIST_ALMOST_ALL 1
+#define LIST_ALMOST_ALL 2
 
 #define ARGS { \
 		{"", '1', "listing", VERTICAL_LISTING},\
+		{"", 'a', "visibility", LIST_HIDDEN},\
 		{NULL, '\0', NULL, 0}\
 	}
 
@@ -46,11 +49,11 @@ File **create_long_list(size_t size);
 void cleanup(File **file_list);
 
 DIR *open_directory(char *path);
-int file_count(char *path, int hidden);
-void print_directory(char *path, int hidden);
+int file_count(char *path);
+void print_directory(char *path);
 
 char **create_array(ssize_t size);
-char **get_list(char *path, int hidden);
+char **get_list(char *path);
 void print_list(char **list);
 void cleanup_list(char **list);
 
@@ -83,6 +86,8 @@ int status(int num);
 
 int set_opt(char *opt, int num);
 void check_opts(char *args[], int argc);
+#define	RETRIEVE_OPT -1
+
 int check_opt_arg(char *arg);
 
 

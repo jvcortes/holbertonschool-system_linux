@@ -69,7 +69,7 @@ print_directories(char **arr, size_t size, size_t count, size_t dir_count)
 	{
 		if (!is_file(arr[i]) && can_read_dir(arr[i]))
 		{
-			list = get_list(arr[i], 0);
+			list = get_list(arr[i]);
 			if (list)
 			{
 				if (j > 0 && j < (int) dir_count)
@@ -125,7 +125,7 @@ print_many(char **arr, size_t size)
 	}
 
 	if (!file_count && !dir_count && !status(RETRIEVE_STATUS))
-		print_directory("./", 0);
+		print_directory("./");
 }
 
 /**

@@ -46,25 +46,26 @@ DIR
  * the function will return -1.
  */
 int
-file_count(char *path, int hidden)
+file_count(char *path)
 {
 	DIR *dir;
 	struct dirent *read;
 	int count = 0;
+	int visibility = set_opt("visibility", RETRIEVE_OPT);
 
 	dir = open_directory(path);
 	if (dir == NULL)
 		return (-1);
 
 	while ((read = readdir(dir)) != NULL)
-		if (!hidden)
-		{
-			if (read->d_name[0] != '.')
+		switch (visibility) {
+			case LIST_VISIBLE:
+				if (read->d_name[0] != '.')
+					count++;
+				break;
+			case LIST_HIDDEN:
 				count++;
-		}
-		else
-		{
-			count++;
+				break;
 		}
 
 	closedir(dir);
@@ -80,11 +81,11 @@ file_count(char *path, int hidden)
  * Return: nothing.
  */
 void
-print_directory(char *path, int hidden)
+print_directory(char *path)
 {
 	char **arr;
 
-	arr = get_list(path, hidden);
+	arr = get_list(path);
 	print_list(arr);
 	cleanup_list(arr);
 }

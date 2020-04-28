@@ -15,13 +15,14 @@
  * function will return a null pointer.
  */
 char
-**get_list(char *path, int hidden)
+**get_list(char *path)
 {
+	unsigned int i = 0;
+	int visibility = set_opt("visibility", RETRIEVE_OPT);
+	char **files;
+	ssize_t size = file_count(path);
 	DIR *dir;
 	struct dirent *read;
-	char **files;
-	ssize_t size = file_count(path, hidden);
-	unsigned int i = 0;
 
 	dir = open_directory(path);
 	files = malloc(size * sizeof(char *) + sizeof(char *));
@@ -33,9 +34,14 @@ char
 
 	while ((read = readdir(dir)) != NULL)
 	{
-		if (!hidden)
-			if (read->d_name[0] == '.')
-				continue;
+		switch (visibility) {
+			case LIST_VISIBLE:
+				if (read->d_name[0] == '.')
+					continue;
+				break;
+			case LIST_HIDDEN:
+				break;
+		}
 
 		files[i] = malloc(sizeof(char) * SIZE);
 		if (files[i] == NULL)

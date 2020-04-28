@@ -32,7 +32,8 @@ int status(int num)
 int set_opt(char *opt, int num)
 {
 	static Settings settings = {
-		DEFAULT_LISTING
+		DEFAULT_LISTING,
+		LIST_VISIBLE
 	};
 
 	if (!_strcmp(opt, "listing"))
@@ -41,6 +42,14 @@ int set_opt(char *opt, int num)
 			settings.vertical_listing = num;
 		else
 			return (settings.vertical_listing);
+	}
+
+	if (!_strcmp(opt, "visibility"))
+	{
+		if (num != -1)
+			settings.visibility = num;
+		else
+			return (settings.visibility);
 	}
 
 	return (0);
@@ -77,23 +86,25 @@ void check_opts(char *args[], int argc)
 int check_opt_arg(char *arg)
 {
 	static Flag flags[] = ARGS;
-	int i, j, ch = 0;
+	int i, j, ch = 0, found = 0;
 
-	for (i = 0; flags[i].long_name; i++)
+	for (i = 1; arg[i]; i++)
 	{
-		for (j = 1; arg[j] != '\0'; j++)
+		found = 0;
+		for (j = 0; flags[j].name != '\0'; j++)
 		{
-			if (arg[j] == flags[i].name)
+			if (arg[i] == flags[j].name)
 			{
 				ch = 1;
-				set_opt(flags[i].option, flags[i].value);
+				found = 1;
+				set_opt(flags[j].option, flags[j].value);
 			}
-			else
-			{
-				fprintf(stderr, "hls: invalid option -- '%c'\n", arg[j]);
-				fprintf(stderr, "Try hls --help for more information.\n");
-				exit(2);
-			}
+		}
+		if (!found)
+		{
+			fprintf(stderr, "hls: invalid option -- '%c'\n", arg[j]);
+			fprintf(stderr, "Try hls --help for more information.\n");
+			exit(2);
 		}
 	}
 

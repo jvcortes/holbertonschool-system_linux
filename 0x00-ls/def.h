@@ -23,8 +23,8 @@ typedef struct Settings
 
 typedef struct Flag
 {
-	char *name;
 	char *long_name;
+	char name;
 	char *option;
 	int value;
 } Flag;
@@ -36,8 +36,8 @@ typedef struct Flag
 #define LIST_ALMOST_ALL 1
 
 #define ARGS { \
-		{"-1", "", "listing", VERTICAL_LISTING},\
-		{NULL, NULL, NULL, 0}\
+		{"", '1', "listing", VERTICAL_LISTING},\
+		{NULL, '\0', NULL, 0}\
 	}
 
 
@@ -74,8 +74,11 @@ int _strcmp(char *s1, char *s2);
 
 /* definitions for runtime and error handling utilities */
 int status(int num);
+#define RETRIEVE_STATUS -1
+
 int set_opt(char *opt, int num);
 void check_opts(char *args[], int argc);
+int check_opt_arg(char *arg);
 
 
 #endif /* ifndef LS */

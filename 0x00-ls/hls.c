@@ -148,7 +148,7 @@ print_many(char **arr, size_t size)
 		print_directories(arr, size, dir_count);
 	}
 
-	if (!file_count && !dir_count)
+	if (!file_count && !dir_count && !status(RETRIEVE_STATUS))
 		print_directory("./", 0);
 }
 
@@ -163,5 +163,5 @@ int main(int argc, char *argv[])
 {
 	check_opts(argv, argc);
 	print_many((argv + 1), argc - 1);
-	return (status(-1));
+	return (status(RETRIEVE_STATUS));
 }

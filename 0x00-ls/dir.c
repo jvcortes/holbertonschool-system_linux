@@ -78,10 +78,10 @@ file_count(char *path, int hidden)
  * @hidden: check for hidden files and directories.
  *
  * Return: nothing.
- */ 
+ */
 void
 print_directory(char *path, int hidden)
-{		
+{
 	char **arr;
 
 	arr = get_list(path, hidden);

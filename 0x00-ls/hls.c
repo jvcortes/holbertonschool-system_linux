@@ -55,7 +55,8 @@ print_files(char **arr, size_t size, size_t count)
  * account.
  * @arr: pointer to the array.
  * @size: size of the array.
- * @count: number of directories to print from the array.
+ * @count: number of valid entries inside the array
+ * @dir_count: number of directories to print from the array.
  *
  * Return: nothing.
  */
@@ -72,6 +73,7 @@ print_directories(char **arr, size_t size, size_t count, size_t dir_count)
 			list = get_list(arr[i]);
 			if (list)
 			{
+				quicksort_str(list, str_array_size(list));
 				if (j > 0 && j < (int) dir_count)
 					printf("\n");
 				if (count > 1)
@@ -95,6 +97,9 @@ void
 print_many(char **arr, size_t size)
 {
 	int i = 0, count = 0, file_count = 0, dir_count = 0;
+
+	if (size)
+		quicksort_str(arr, size);
 
 	while (i < (int) size)
 	{
@@ -137,7 +142,11 @@ print_many(char **arr, size_t size)
  */
 int main(int argc, char *argv[])
 {
+	char **arr;
+
 	check_opts(argv, argc);
-	print_many((argv + 1), argc - 1);
+	arr = filter_null(argv + 1, argc - 1);
+	print_many(arr, str_array_size(arr));
+	free(arr);
 	return (status(RETRIEVE_STATUS));
 }

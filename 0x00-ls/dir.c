@@ -40,7 +40,6 @@ DIR
 /**
  * file_count - counts the files and directories inside a directory.
  * @path: path to the directory.
- * @hidden: count hidden files.
  *
  * Return: file/directory count, if the open_directory() call fails,
  * the function will return -1.
@@ -58,14 +57,15 @@ file_count(char *path)
 		return (-1);
 
 	while ((read = readdir(dir)) != NULL)
-		switch (visibility) {
-			case LIST_VISIBLE:
-				if (read->d_name[0] != '.')
-					count++;
-				break;
-			case LIST_HIDDEN:
+		switch (visibility)
+		{
+		case LIST_VISIBLE:
+			if (read->d_name[0] != '.')
 				count++;
-				break;
+			break;
+		case LIST_HIDDEN:
+			count++;
+			break;
 		}
 
 	closedir(dir);
@@ -76,7 +76,6 @@ file_count(char *path)
 /**
  * print_directory - prints the contents of a directory
  * @path: path to the directory
- * @hidden: check for hidden files and directories.
  *
  * Return: nothing.
  */

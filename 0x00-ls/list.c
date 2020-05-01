@@ -9,7 +9,6 @@
  * get_list - creates and fills an array containing the file
  * names inside a directory.
  * @path: path to the directory.
- * @hidden: retrieve hidden files.
  *
  * Return: pointer to the created list, if memory allocation fails, the
  * function will return a null pointer.
@@ -34,13 +33,14 @@ char
 
 	while ((read = readdir(dir)) != NULL)
 	{
-		switch (visibility) {
-			case LIST_VISIBLE:
-				if (read->d_name[0] == '.')
-					continue;
-				break;
-			case LIST_HIDDEN:
-				break;
+		switch (visibility)
+		{
+		case LIST_VISIBLE:
+			if (read->d_name[0] == '.')
+				continue;
+			break;
+		case LIST_HIDDEN:
+			break;
 		}
 
 		files[i] = malloc(sizeof(char) * SIZE);

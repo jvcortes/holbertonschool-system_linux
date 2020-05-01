@@ -79,6 +79,18 @@ char *_strncat(char *dest, char *src, int n);
 char *_strncpy(char *dest, const char *src, int n);
 char *_strdup(const char *s);
 int _strcmp(char *s1, char *s2);
+char *strstrp(char *s, char *c);
+int stridx(char *s, char c);
+
+/* sorting utilities */
+void quicksort_str(char **arr, size_t size);
+int lomuto_partition(char **arr, size_t size);
+
+/* array utilities */
+char **copy(char **arr, size_t size);
+char **filter_null(char **arr, size_t size);
+size_t str_array_size(char **arr);
+
 
 /* definitions for runtime and error handling utilities */
 int status(int num);

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <locale.h>
 #include <stdlib.h>
 #include "def.h"
 
@@ -143,7 +144,8 @@ print_many(char **arr, size_t size)
 int main(int argc, char *argv[])
 {
 	char **arr;
-
+	
+	setlocale(LC_ALL, "");
 	check_opts(argv, argc);
 	arr = filter_null(argv + 1, argc - 1);
 	print_many(arr, str_array_size(arr));

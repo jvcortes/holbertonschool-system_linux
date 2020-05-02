@@ -39,6 +39,11 @@ char
 			if (read->d_name[0] == '.')
 				continue;
 			break;
+		case LIST_ALMOST_ALL:
+			if (!_strcmp(read->d_name, "..") ||
+					!_strcmp(read->d_name, "."))
+				continue;
+			break;
 		case LIST_HIDDEN:
 			break;
 		}

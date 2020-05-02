@@ -40,6 +40,7 @@ typedef struct Flag
 #define ARGS { \
 		{"", '1', "listing", VERTICAL_LISTING},\
 		{"", 'a', "visibility", LIST_HIDDEN},\
+		{"", 'A', "visibility", LIST_ALMOST_ALL},\
 		{NULL, '\0', NULL, 0}\
 	}
 

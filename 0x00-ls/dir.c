@@ -63,6 +63,11 @@ file_count(char *path)
 			if (read->d_name[0] != '.')
 				count++;
 			break;
+		case LIST_ALMOST_ALL:
+			if (_strcmp(read->d_name, "..") ||
+					_strcmp(read->d_name, "."))
+				count++;
+			break;
 		case LIST_HIDDEN:
 			count++;
 			break;

@@ -45,6 +45,9 @@ print_files(char **arr, size_t size, size_t count)
 				}
 			}
 			break;
+		case LONG_LISTING:
+			print_files_long_format(arr);
+			break;
 	}
 	printf("\n");
 

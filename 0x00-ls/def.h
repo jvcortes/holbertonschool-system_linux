@@ -4,25 +4,26 @@
 #include <stdlib.h>
 #include <dirent.h>
 
-typedef struct File
+typedef struct file_t
 {
 	char path[4096];
 	char name[256];
 	char type;
+	int  nlink;
 	char perm[9];
-	char *time;
+	char time[32];
 	long size;
 	char *user;
 	char *group;
 } File;
 
-typedef struct Settings
+typedef struct settings_t
 {
 	int vertical_listing;
 	int visibility;
 } Settings;
 
-typedef struct Flag
+typedef struct flag_t
 {
 	char *long_name;
 	char name;
@@ -30,8 +31,17 @@ typedef struct Flag
 	int value;
 } Flag;
 
+typedef struct long_list_formatting_t
+{
+	int user_spaces;
+	int group_spaces;
+	int nlink_spaces;
+	int size_spaces;
+} LongListFormatting;
+
 #define DEFAULT_LISTING 0
 #define VERTICAL_LISTING 1
+#define LONG_LISTING 2
 
 #define LIST_VISIBLE 0
 #define LIST_HIDDEN 1
@@ -39,6 +49,7 @@ typedef struct Flag
 
 #define ARGS { \
 		{"", '1', "listing", VERTICAL_LISTING},\
+		{"", 'l', "listing", LONG_LISTING},\
 		{"", 'a', "visibility", LIST_HIDDEN},\
 		{"", 'A', "visibility", LIST_ALMOST_ALL},\
 		{NULL, '\0', NULL, 0}\
@@ -47,6 +58,9 @@ typedef struct Flag
 
 File **get_long_list(char *path, int hidden);
 File **create_long_list(size_t size);
+void print_files_long_format(char **arr);
+void print_file_long_format(File *file, LongListFormatting *formatting);
+void set_file_details(File *file, char *path);
 void cleanup(File **file_list);
 
 DIR *open_directory(char *path);
@@ -74,6 +88,10 @@ void print_directories(
 		size_t dir_count
 );
 
+/* functions for formatting */
+LongListFormatting *get_formatting(File **arr);
+void format_time(char *s, size_t size, const time_t *t);
+
 /* definitions for string utilities */
 int _strlen(const char *s);
 char *_strncat(char *dest, char *src, int n);
@@ -92,6 +110,8 @@ char **copy(char **arr, size_t size);
 char **filter_null(char **arr, size_t size);
 size_t str_array_size(char **arr);
 
+/* math utilities */
+int digits(int n);
 
 /* definitions for runtime and error handling utilities */
 int status(int num);

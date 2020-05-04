@@ -97,3 +97,45 @@ str_array_size(char **arr)
 
 	return (i);
 }
+
+
+/**
+ * create_long_list - creates a dynamically allocated array of pointers to File
+ * instances. Contains a null pointer at its end.
+ * @size: size of the list, has to include the size for the null pointer.
+ *
+ * Return: pointer to the newly created array. If memory allocation fails
+ * the function will return a null pointer.
+ */
+File
+**create_long_list(size_t size)
+{
+	int i;
+	File **files;
+
+	if (size == 0)
+		return (NULL);
+
+	files = malloc(size * sizeof(File *) + sizeof(File *));
+	if (files == NULL)
+	{
+		free(files);
+		return (NULL);
+	}
+
+	for (i = 0; i < (int) size; i++)
+	{
+		files[i] = malloc(sizeof(File));
+		if (files[i] == NULL)
+		{
+			while (i >= 0)
+				free(files[i--]);
+			free(files);
+			return (NULL);
+		}
+	}
+
+	files[i] = NULL;
+
+	return (files);
+}

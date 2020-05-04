@@ -10,47 +10,6 @@
 
 
 /**
- * create_long_list - creates a dynamically allocated array of pointers to File
- * instances. Contains a null pointer at its end.
- * @size: size of the list, has to include the size for the null pointer.
- *
- * Return: pointer to the newly created array. If memory allocation fails
- * the function will return a null pointer.
- */
-File
-**create_long_list(size_t size)
-{
-	int i;
-	File **files;
-
-	if (size == 0)
-		return (NULL);
-
-	files = malloc(size * sizeof(File *));
-	if (files == NULL)
-	{
-		free(files);
-		return (NULL);
-	}
-
-	for (i = 0; (size_t) i < size - 1; i++)
-	{
-		files[i] = malloc(sizeof(File));
-		if (files[i] == NULL)
-		{
-			while (i >= 0)
-				free(files[i--]);
-			free(files);
-			return (NULL);
-		}
-	}
-
-	files[size - 1] = NULL;
-
-	return (files);
-}
-
-/**
  * get_long_list - populates an array of File instances using a
  * directory stream.
  *
@@ -129,10 +88,6 @@ File
 		files[i]->perm[7] = filestat.st_mode & S_IROTH ? 'w' : '-';
 		files[i]->perm[8] = filestat.st_mode & S_IROTH ? 'x' : '-';
 
-		files[i]->time = ctime(&(filestat.st_mtime));
-		files[i]->time[_strlen(files[i]->time) - 9] = '\0';
-		files[i]->size = filestat.st_size;
-
 		c = getpwuid(filestat.st_uid)->pw_name;
 		if (_strlen(c))
 		{
@@ -154,6 +109,126 @@ File
 	return (files);
 }
 
+void
+print_files_long_format(char **arr)
+{
+	int i, j;
+	size_t size;
+	File **files;
+	LongListFormatting *formatting;
+
+	for (i = 0, size = 0; arr[i] != NULL; i++)
+		if (is_file(arr[i]))
+			size++;
+
+	files = create_long_list(size);
+
+	for (i = 0, j = 0; arr[i] != NULL; i++)
+		if (is_file(arr[i]))
+			set_file_details(files[j++], arr[i]);
+
+	formatting = get_formatting(files);
+
+	for (j = 0; files[j] != NULL; j++)
+	{
+		print_file_long_format(files[j], formatting);
+		if (files[j + 1] != NULL)
+			printf("\n");
+	}
+
+	free(formatting);
+	cleanup(files);
+}
+
+void
+print_file_long_format(File *file, LongListFormatting *formatting)
+{
+	int i;
+
+	printf("%c", file->type);
+	for (i = 0; i <= 8; i++)
+		printf("%c", file->perm[i]);
+
+	printf(" %*d", formatting->nlink_spaces, file->nlink);
+	printf(" %*s", formatting->user_spaces, file->user);
+	printf(" %-*s", formatting->group_spaces, file->group);
+	printf(" %*ld", formatting->size_spaces, file->size);
+	printf(" %s", file->time);
+	printf(" %s", file->name);
+}
+
+
+void
+set_file_details(File *file, char *path)
+{
+	struct stat filestat;
+	int buf_size;
+	char *user;
+	char *group;
+
+	if (path == NULL || file == NULL)
+		return;
+
+	_strncpy(file->name, path, sizeof(file->name) - 1);
+	if ((lstat(file->name, &filestat)) == -1)
+		exit(2);
+
+	switch (filestat.st_mode & S_IFMT)
+	{
+		case S_IFREG:
+			file->type = '-';
+			break;
+		case S_IFDIR:
+			file->type = 'd';
+			break;
+		case S_IFCHR:
+			file->type = 'c';
+			break;
+		case S_IFBLK:
+			file->type = 'b';
+			break;
+		case S_IFIFO:
+			file->type = 'p';
+			break;
+		case S_IFLNK:
+			file->type = 'l';
+			break;
+		case S_IFSOCK:
+			file->type = 's';
+			break;
+	}
+
+	file->perm[0] = filestat.st_mode & S_IRUSR ? 'r' : '-';
+	file->perm[1] = filestat.st_mode & S_IWUSR ? 'w' : '-';
+	file->perm[2] = filestat.st_mode & S_IXUSR ? 'x' : '-';
+	file->perm[3] = filestat.st_mode & S_IRGRP ? 'r' : '-';
+	file->perm[4] = filestat.st_mode & S_IWGRP ? 'w' : '-';
+	file->perm[5] = filestat.st_mode & S_IXGRP ? 'x' : '-';
+	file->perm[6] = filestat.st_mode & S_IROTH ? 'r' : '-';
+	file->perm[7] = filestat.st_mode & S_IROTH ? 'w' : '-';
+	file->perm[8] = filestat.st_mode & S_IROTH ? 'x' : '-';
+
+	file->nlink = filestat.st_nlink;
+	format_time(file->time, sizeof(file->time), &filestat.st_ctime);
+	file->size = filestat.st_size;
+
+	user = getpwuid(filestat.st_uid)->pw_name;
+	if (user != NULL)
+	{
+		buf_size = (_strlen(user) * sizeof(char)) + sizeof(char);
+		file->user = malloc(buf_size);
+		_strncpy(file->user, user, buf_size);
+	}
+
+	group = getgrgid(filestat.st_gid)->gr_name;
+	if (group != NULL)
+	{
+		buf_size = (_strlen(group) * sizeof(char)) + sizeof(char);
+		file->group = malloc(buf_size);
+		_strncpy(file->group, group, buf_size);
+	}
+
+}
 /**
  * cleanup - frees an dynamically allocated array of File instances.
  * @arr: pointer to the array.

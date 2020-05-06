@@ -115,7 +115,7 @@ typedef struct long_list_formatting_t
 
 File **get_long_list(char *path, int hidden);
 File **create_long_list(size_t size);
-void print_files_long_format(char **arr, char *basepath);
+int print_files_long_format(char **arr, char *basepath);
 void print_file_long_format(File *file, LongListFormatting *formatting);
 void set_file_details(File *file, char *name, char *basepath);
 void cleanup_long_list(File **file_list);

@@ -123,8 +123,8 @@ print_list(char **list, char *basepath)
 			}
 			break;
 		case LONG_LISTING:
-			print_files_long_format(list, basepath);
-			printf("\n");
+			if (print_files_long_format(list, basepath))
+				printf("\n");
 	}
 }
 

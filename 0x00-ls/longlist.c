@@ -10,7 +10,7 @@
 #include "def.h"
 
 
-void
+int
 print_files_long_format(char **arr, char *basepath)
 {
 	struct long_list_formatting_t *formatting;
@@ -18,6 +18,8 @@ print_files_long_format(char **arr, char *basepath)
 	int i, j;
 	size_t size;
 
+	if (arr == NULL || arr[0] == NULL)
+		return (0);
 
 	for (i = 0, size = 0; arr[i] != NULL; i++)
 		size++;
@@ -38,6 +40,8 @@ print_files_long_format(char **arr, char *basepath)
 
 	free(formatting);
 	cleanup_long_list(files);
+
+	return (1);
 }
 
 void

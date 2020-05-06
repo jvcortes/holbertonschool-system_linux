@@ -77,10 +77,10 @@ void format_time(char *s, size_t size, const time_t *t)
 
 	if (year_now == year)
 	{
-		strftime(s, size - 1, "%b %e %H:%M", cmp_t);
+		strftime(s, size - 1, "%b %d %H:%M", cmp_t);
 	}
 	else
 	{
-		strftime(s, size - 1, "%b %e  %Y", cmp_t);
+		strftime(s, size - 1, "%b %d  %Y", cmp_t);
 	}
 }

@@ -26,7 +26,7 @@ void quicksort_str(char **arr, size_t size)
 /**
  * lomuto_partition - partitionates an array of strings, ignores the '/'
  * character.
- * 
+ *
  * @arr: pointer to the array.
  * @size: size of the array.
  *

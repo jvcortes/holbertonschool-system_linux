@@ -3,6 +3,15 @@
 #include "def.h"
 
 
+/**
+ * get_formatting - gets the formatting for a long format file
+ * list.
+ *
+ * @arr: list of File structs.
+ *
+ * Return: struct containing the correct spaces for every field in the long
+ * format list.
+ */
 LongListFormatting *get_formatting(File **arr)
 {
 	int i, d = 0;
@@ -41,6 +50,18 @@ LongListFormatting *get_formatting(File **arr)
 	return (f);
 }
 
+/**
+ * format_time - formats the date and time for a file or directory:
+ *
+ * The returned string will contain the abbreviated month name,
+ * the day and the time. If a date with a different year from the current
+ * one is passed, the returned string will contain the year instead
+ * of the time.
+ *
+ * @s: buffer to write the formatted string.
+ * @size: max size of the buffer.
+ * @t: time to format.
+ */
 void format_time(char *s, size_t size, const time_t *t)
 {
 	time_t now_t;

@@ -91,15 +91,16 @@ char
 /**
  * print_list - prints a array of file names.
  * @list: pointer to the array.
+ * @basepath: base path for relative or absoluthe path.
  *
  * Return: nothing.
  */
 void
-print_list(char **list)
+print_list(char **list, char *basepath)
 {
 	int i = 0;
 
-	switch (set_opt("listing", -1))
+	switch (set_opt("listing", RETRIEVE_OPT))
 	{
 		case DEFAULT_LISTING:
 			while (list[i])
@@ -121,6 +122,9 @@ print_list(char **list)
 				i++;
 			}
 			break;
+		case LONG_LISTING:
+			print_files_long_format(list, basepath);
+			printf("\n");
 	}
 }
 
@@ -131,7 +135,7 @@ print_list(char **list)
  * Return: nothing.
  */
 void
-cleanup_list(char **arr)
+cleanup(char **arr)
 {
 	int i = 0;
 

@@ -67,3 +67,19 @@ int stridx(char *s, char c)
 
 	return (-1);
 }
+
+/**
+ * _memset - fills a memory area with an specified byte
+ * @s: pointer to the memory area
+ * @b: specified byte
+ * @n: amount of bytes to fill
+ * Return: pointer to the modified memory area
+ */
+char *_memset(char *s, char b, unsigned int n)
+{
+	int i;
+
+	for (i = 0; i < (int)n; i++)
+		s[i] = b;
+	return (s);
+}

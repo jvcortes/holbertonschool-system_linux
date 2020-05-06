@@ -5,136 +5,122 @@
 
 
 /**
- * print_files - prints the associated files with every path in a provided
- * array. Paths containing folders will not be taken into account.
+ * print_files - prints the associated non-folders with every path in a
+ * provided array.
  * @arr: pointer to the array.
- * @size: size of the array.
- * @count: number of files to print from the array.
  *
  * Return: nothing.
  */
 void
-print_files(char **arr, size_t size, size_t count)
+print_files(char **arr)
 {
-	int i, j;
+	int i;
 
-	if (!count)
+	if (arr == NULL)
 		return;
 
 	switch (set_opt("listing", -1))
 	{
 		case DEFAULT_LISTING:
-			for (i = 0, j = 0; i < (int) size; i++)
+			for (i = 0; arr[i] != NULL; i++)
 			{
-				if (is_file(arr[i]))
-				{
-					print_file(arr[i]);
-					if (++j < (int) count)
-						printf("  ");
-				}
+				print_file(arr[i]);
+				if (arr[i + 1] != NULL)
+					printf("  ");
 			}
 			break;
 		case VERTICAL_LISTING:
-			for (i = 0, j = 0; i < (int) size; i++)
+			for (i = 0; arr[i] != NULL; i++)
 			{
-				if (is_file(arr[i]))
-				{
-					print_file(arr[i]);
-					if (++j < (int) count)
-						printf("\n");
-				}
+				print_file(arr[i]);
+				if (arr[i + 1] != NULL)
+					printf("\n");
 			}
 			break;
 		case LONG_LISTING:
-			print_files_long_format(arr);
+			print_files_long_format(arr, "");
 			break;
 	}
 	printf("\n");
-
 }
 
 /**
  * print_directories - prints the associated directories with every path in a
  * provided array. Paths containing single files will not be taken into
  * account.
+ *
  * @arr: pointer to the array.
- * @size: size of the array.
- * @count: number of valid entries inside the array
- * @dir_count: number of directories to print from the array.
+ * @many: print more than one directory, separated by a newline character.
  *
  * Return: nothing.
  */
 void
-print_directories(char **arr, size_t size, size_t count, size_t dir_count)
+print_directories(char **arr, int many)
 {
-	int i, j;
-	char **list = NULL;
+	int i;
+	char **file_list = NULL;
 
-	for (i = 0, j = 0; i < (int) size; i++)
+	for (i = 0; arr[i] != NULL; i++)
 	{
-		if (!is_file(arr[i]) && can_read_dir(arr[i]))
+		if (can_read_dir(arr[i]))
 		{
-			list = get_list(arr[i]);
-			if (list)
+			file_list = get_list(arr[i]);
+			if (file_list)
 			{
-				quicksort_str(list, str_array_size(list));
-				if (j > 0 && j < (int) dir_count)
+				quicksort_str(
+					file_list,
+					str_array_size(file_list)
+				);
+				if (i != 0)
 					printf("\n");
-				if (count > 1)
+				if (many != 0)
 					printf("%s:\n", arr[i]);
-				print_list(list);
-				cleanup_list(list);
-				j++;
+				print_list(file_list, arr[i]);
+				cleanup(file_list);
 			}
 		}
 	}
 }
 
+
 /**
  * print_many - prints more than one entry if its present in the filesystem.
  * @arr: pointer to the array.
- * @size: size of the array.
  *
  * Return: nothing.
  */
 void
-print_many(char **arr, size_t size)
+print(char **arr)
 {
-	int i = 0, count = 0, file_count = 0, dir_count = 0;
+	int size = str_array_size(arr);
+	char **files, **directories;
 
-	if (size)
-		quicksort_str(arr, size);
-
-	while (i < (int) size)
-	{
-		if (arr[i])
-			count++;
-		if (path_exists(arr[i]))
-		{
-			if (is_file(arr[i]))
-			{
-				file_count++;
-			}
-			else
-			{
-				dir_count++;
-			}
-		}
-		i++;
-	}
-
-	if (file_count)
-		print_files(arr, size, file_count);
-
-	if (dir_count)
-	{
-		if (count && file_count)
-			printf("\n");
-		print_directories(arr, size, count, dir_count);
-	}
-
-	if (!file_count && !dir_count && !status(RETRIEVE_STATUS))
+	if (arr == NULL)
 		print_directory("./");
+
+	quicksort_str(arr, str_array_size(arr));
+	files = get_files_from_args(arr);
+	directories = get_directories_from_args(arr);
+
+	if (files != NULL)
+	{
+		print_files(files);
+		free(files);
+		if (directories != NULL)
+			printf("\n");
+	}
+	if (directories != NULL)
+	{
+		if (size > 1)
+		{
+			print_directories(directories, 1);
+		}
+		else
+		{
+			print_directories(directories, 0);
+		}
+		free(directories);
+	}
 }
 
 /**
@@ -147,11 +133,11 @@ print_many(char **arr, size_t size)
 int main(int argc, char *argv[])
 {
 	char **arr;
-	
+
 	setlocale(LC_ALL, "");
 	check_opts(argv, argc);
 	arr = filter_null(argv + 1, argc - 1);
-	print_many(arr, str_array_size(arr));
+	print(arr);
 	free(arr);
 	return (status(RETRIEVE_STATUS));
 }

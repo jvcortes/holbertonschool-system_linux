@@ -133,6 +133,9 @@ File
 			free(files);
 			return (NULL);
 		}
+		_memset(files[i]->name, '\0', sizeof(files[i]->name));
+		_memset(files[i]->path, '\0', sizeof(files[i]->name));
+		_memset(files[i]->linkname, '\0', sizeof(files[i]->name));
 	}
 
 	files[i] = NULL;

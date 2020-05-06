@@ -3,129 +3,29 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <time.h>
 #include <pwd.h>
 #include <grp.h>
 #include "def.h"
 
 
-/**
- * get_long_list - populates an array of File instances using a
- * directory stream.
- *
- * @path: path to the directory.
- * @hidden: list hidden files and directories.
- *
- * Return: pointer to the array. If memory allocation fails for any of the File
- * struct members, the function will return a null pointer.
- */
-File
-**get_long_list(char *path, int hidden)
-{
-	DIR *dir;
-	struct dirent *read;
-	struct stat filestat;
-	ssize_t size = file_count(path);
-	File **files;
-	unsigned int i = 0;
-	char *c;
-
-	files = create_long_list(size + 1);
-	dir = open_directory(path);
-
-	while ((read = readdir(dir)) != NULL)
-	{
-		if (!hidden)
-		{
-			if (read->d_name[0] == '.')
-				continue;
-		}
-		_strncpy(files[i]->name, read->d_name, sizeof(files[i]->name) - 1);
-		_strncpy(files[i]->path, path, sizeof(files[i]->path) - 1);
-		_strncat(
-			files[i]->path,
-			files[i]->name,
-			sizeof(files[i]->path) - _strlen(files[i]->path) - 1
-		);
-
-		if ((lstat(files[i]->path, &filestat)) == -1)
-		{
-			exit(2);
-		}
-
-		switch (filestat.st_mode & S_IFMT)
-		{
-			case S_IFREG:
-				files[i]->type = '-';
-				break;
-			case S_IFDIR:
-				files[i]->type = 'd';
-				break;
-			case S_IFCHR:
-				files[i]->type = 'c';
-				break;
-			case S_IFBLK:
-				files[i]->type = 'b';
-				break;
-			case S_IFIFO:
-				files[i]->type = 'p';
-				break;
-			case S_IFLNK:
-				files[i]->type = 'l';
-				break;
-			case S_IFSOCK:
-				files[i]->type = 's';
-				break;
-		}
-
-		files[i]->perm[0] = filestat.st_mode & S_IRUSR ? 'r' : '-';
-		files[i]->perm[1] = filestat.st_mode & S_IWUSR ? 'w' : '-';
-		files[i]->perm[2] = filestat.st_mode & S_IXUSR ? 'x' : '-';
-		files[i]->perm[3] = filestat.st_mode & S_IRGRP ? 'r' : '-';
-		files[i]->perm[4] = filestat.st_mode & S_IWGRP ? 'w' : '-';
-		files[i]->perm[5] = filestat.st_mode & S_IXGRP ? 'x' : '-';
-		files[i]->perm[6] = filestat.st_mode & S_IROTH ? 'r' : '-';
-		files[i]->perm[7] = filestat.st_mode & S_IROTH ? 'w' : '-';
-		files[i]->perm[8] = filestat.st_mode & S_IROTH ? 'x' : '-';
-
-		c = getpwuid(filestat.st_uid)->pw_name;
-		if (_strlen(c))
-		{
-			files[i]->user = malloc(_strlen(c) * sizeof(char));
-			files[i]->user = _strncpy(files[i]->user, c, _strlen(c));
-		}
-
-		c = getgrgid(filestat.st_uid)->gr_name;
-		if (_strlen(c))
-		{
-			files[i]->group = malloc(_strlen(c) * sizeof(char));
-			files[i]->group = _strncpy(files[i]->group, c, _strlen(c));
-		}
-
-		i++;
-	}
-
-	free(dir);
-	return (files);
-}
-
 void
-print_files_long_format(char **arr)
+print_files_long_format(char **arr, char *basepath)
 {
+	struct long_list_formatting_t *formatting;
+	struct file_t **files;
 	int i, j;
 	size_t size;
-	File **files;
-	LongListFormatting *formatting;
+
 
 	for (i = 0, size = 0; arr[i] != NULL; i++)
-		if (is_file(arr[i]))
-			size++;
+		size++;
 
 	files = create_long_list(size);
 
 	for (i = 0, j = 0; arr[i] != NULL; i++)
-		if (is_file(arr[i]))
-			set_file_details(files[j++], arr[i]);
+		set_file_details(files[j++], arr[i], basepath);
 
 	formatting = get_formatting(files);
 
@@ -137,7 +37,7 @@ print_files_long_format(char **arr)
 	}
 
 	free(formatting);
-	cleanup(files);
+	cleanup_long_list(files);
 }
 
 void
@@ -155,23 +55,33 @@ print_file_long_format(File *file, LongListFormatting *formatting)
 	printf(" %*ld", formatting->size_spaces, file->size);
 	printf(" %s", file->time);
 	printf(" %s", file->name);
+	if (file->linkname[0] != '\0')
+		printf(" -> %s", file->linkname);
 }
 
 
 void
-set_file_details(File *file, char *path)
+set_file_details(File *file, char *name, char *basepath)
 {
 	struct stat filestat;
 	int buf_size;
 	char *user;
 	char *group;
 
-	if (path == NULL || file == NULL)
+	if (name == NULL || file == NULL || basepath == NULL)
 		return;
 
-	_strncpy(file->name, path, sizeof(file->name) - 1);
-	if ((lstat(file->name, &filestat)) == -1)
+	_strncpy(file->path, basepath, sizeof(file->path) - 1);
+	if (basepath[0] != '\0' && basepath[_strlen(basepath) - 1] != '/')
+		_strncat(file->path, "/", sizeof(file->path) - _strlen(file->path) - 1);
+	_strncat(file->path, name, sizeof(file->path) - _strlen(file->path) - 1);
+
+	_strncpy(file->name, name, sizeof(file->name) - 1);
+	if ((lstat(file->path, &filestat)) == -1)
+	{
+		perror("");
 		exit(2);
+	}
 
 	switch (filestat.st_mode & S_IFMT)
 	{
@@ -191,6 +101,7 @@ set_file_details(File *file, char *path)
 			file->type = 'p';
 			break;
 		case S_IFLNK:
+			readlink(file->path, file->linkname, sizeof(file->linkname));
 			file->type = 'l';
 			break;
 		case S_IFSOCK:
@@ -205,8 +116,8 @@ set_file_details(File *file, char *path)
 	file->perm[4] = filestat.st_mode & S_IWGRP ? 'w' : '-';
 	file->perm[5] = filestat.st_mode & S_IXGRP ? 'x' : '-';
 	file->perm[6] = filestat.st_mode & S_IROTH ? 'r' : '-';
-	file->perm[7] = filestat.st_mode & S_IROTH ? 'w' : '-';
-	file->perm[8] = filestat.st_mode & S_IROTH ? 'x' : '-';
+	file->perm[7] = filestat.st_mode & S_IWOTH ? 'w' : '-';
+	file->perm[8] = filestat.st_mode & S_IXOTH ? 'x' : '-';
 
 	file->nlink = filestat.st_nlink;
 	format_time(file->time, sizeof(file->time), &filestat.st_ctime);
@@ -229,6 +140,8 @@ set_file_details(File *file, char *path)
 	}
 
 }
+
+
 /**
  * cleanup - frees an dynamically allocated array of File instances.
  * @arr: pointer to the array.
@@ -236,7 +149,7 @@ set_file_details(File *file, char *path)
  * Return: nothing.
  */
 void
-cleanup(File **arr)
+cleanup_long_list(File **arr)
 {
 	int i = 0;
 

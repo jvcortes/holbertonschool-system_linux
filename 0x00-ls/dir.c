@@ -90,6 +90,8 @@ print_directory(char *path)
 	char **arr;
 
 	arr = get_list(path);
-	print_list(arr);
-	cleanup_list(arr);
+	quicksort_str(arr, str_array_size(arr));
+
+	print_list(arr, path);
+	cleanup(arr);
 }

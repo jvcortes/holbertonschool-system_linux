@@ -134,7 +134,6 @@ int main(int argc, char *argv[])
 {
 	char **arr;
 
-	setlocale(LC_ALL, "");
 	check_opts(argv, argc);
 	arr = filter_null(argv + 1, argc - 1);
 	print(arr);

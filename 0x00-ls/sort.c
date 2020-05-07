@@ -46,7 +46,7 @@ int lomuto_partition(char **arr, size_t size)
 		stripped_j = strstrp(arr[j], "/");
 		stripped_pivot = strstrp(arr[size - 1], "/");
 
-		if (strcoll(stripped_j, stripped_pivot) <= 0)
+		if (_strcmp(stripped_j, stripped_pivot) <= 0)
 		{
 			i++;
 			if (i != j)

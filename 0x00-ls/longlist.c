@@ -71,6 +71,7 @@ set_file_details(File *file, char *name, char *basepath)
 	int buf_size;
 	char *user;
 	char *group;
+	char *t;
 
 	if (name == NULL || file == NULL || basepath == NULL)
 		return;
@@ -124,7 +125,9 @@ set_file_details(File *file, char *name, char *basepath)
 	file->perm[8] = filestat.st_mode & S_IXOTH ? 'x' : '-';
 
 	file->nlink = filestat.st_nlink;
-	format_time(file->time, sizeof(file->time), &filestat.st_ctime);
+	t = ctime(&(filestat.st_mtime));
+	_strncpy(file->time, t + 4, 12);
+	/* format_time(file->time, sizeof(file->time), &filestat.st_ctime); */
 	file->size = filestat.st_size;
 
 	user = getpwuid(filestat.st_uid)->pw_name;

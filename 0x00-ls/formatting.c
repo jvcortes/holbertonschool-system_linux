@@ -50,6 +50,7 @@ LongListFormatting *get_formatting(File **arr)
 	return (f);
 }
 
+
 /**
  * format_time - formats the date and time for a file or directory:
  *

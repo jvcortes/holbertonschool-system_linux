@@ -25,7 +25,7 @@ void race_state(int *id, size_t size)
 	static int sz;
 	int i;
 
-	if (id == NULL)
+	if (id == NULL && size > 0)
 		return;
 
 	if (cars == NULL && size > 0)

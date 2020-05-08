@@ -44,14 +44,18 @@ char *_getline(const int fd)
 	while (buf[i])
 	{
 		if (buf[j] != '\n')
-		{
-			j++;
-			b++;
-		}
+			line[b++] = buf[j++];
 		else
 			break;
+		if (j == READ_SIZE)
+		{
+			i = 0;
+			j = 0;
+			memset(buf, '\0', READ_SIZE);
+			if (read(file, buf, READ_SIZE) == 0)
+				return (NULL);
+		}
 	}
-	strncpy(line, &buf[i], b);
 	i = j + 1;
 
 	return (strdup(line));

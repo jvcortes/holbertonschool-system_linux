@@ -40,7 +40,7 @@ void race_state(int *id, size_t size)
 		{
 			cars[i].id = id[i];
 			cars[i].laps = 0;
-			printf("Car %d has joined the race\n", cars[i].id);
+			printf("Car %d joined the race\n", cars[i].id);
 		}
 		sz = size;
 	}
@@ -136,7 +136,7 @@ void add(Car **cars, int size, int *ids, int ids_size)
 	{
 		(*cars)[i].id = ids[j];
 		(*cars)[i].laps = 0;
-		printf("Car %d has joined the race\n", (*cars)[i].id);
+		printf("Car %d joined the race\n", (*cars)[i].id);
 	}
 	free(oc);
 }

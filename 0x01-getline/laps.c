@@ -175,7 +175,8 @@ void quick_sort(Car *arr, size_t size)
  */
 int lomuto_partition(Car *arr, size_t size)
 {
-	int i, j, swap;
+	Car swap;
+	int i, j;
 
 	for (i = -1, j = 0; j <= (int)size - 1;)
 	{
@@ -184,9 +185,9 @@ int lomuto_partition(Car *arr, size_t size)
 			i++;
 			if (i != j)
 			{
-				swap = arr[j].id;
-				arr[j].id = arr[i].id;
-				arr[i].id = swap;
+				swap = arr[j];
+				arr[j] = arr[i];
+				arr[i] = swap;
 			}
 		}
 		j++;

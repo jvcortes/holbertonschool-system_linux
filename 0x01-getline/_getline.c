@@ -35,9 +35,8 @@ char *_getline(const int fd)
 	memset(line, '\0', READ_SIZE);
 	if (!buf[i])
 	{
-		if (read(file, buf, READ_SIZE) == 0)
+		if (read(file, buf, READ_SIZE) <= 0)
 			return (NULL);
-
 	}
 	j = i;
 

@@ -4,6 +4,8 @@
 
 int search_or_add(Car **cars, int size, int *ids, int ids_size);
 void add(Car **cars, int size, int *ids, int ids_size);
+void quick_sort(Car *arr, size_t size);
+int lomuto_partition(Car *arr, size_t size);
 
 /**
  * race_state - prints the race state.
@@ -138,5 +140,57 @@ void add(Car **cars, int size, int *ids, int ids_size)
 		(*cars)[i].laps = 0;
 		printf("Car %d joined the race\n", (*cars)[i].id);
 	}
+	quick_sort(*cars, size + ids_size);
 	free(oc);
+}
+
+
+/**
+ * quick_sort - sorts an array of Car structs
+ * using the Quicksort algorithm
+ *
+ * @arr: pointer of the list
+ * @size: size of the list
+ *
+ * Return: nothing
+ */
+void quick_sort(Car *arr, size_t size)
+{
+	int pivot;
+
+	if (!arr || size <= 1)
+		return;
+
+	pivot = lomuto_partition(arr, size);
+	quick_sort(arr, pivot);
+	quick_sort(arr + (pivot), size - (pivot));
+}
+
+/**
+ * lomuto_partition - partitionates an array using the Lomuto scheme
+ * @arr: pointero to the array
+ * @size: size of the array
+ *
+ * Return: pivot of the partition.
+ */
+int lomuto_partition(Car *arr, size_t size)
+{
+	int i, j, swap;
+
+	for (i = -1, j = 0; j <= (int)size - 1;)
+	{
+		if (arr[j].id <= arr[size - 1].id)
+		{
+			i++;
+			if (i != j)
+			{
+				swap = arr[j].id;
+				arr[j].id = arr[i].id;
+				arr[i].id = swap;
+			}
+		}
+		j++;
+	}
+
+	return (i);
 }

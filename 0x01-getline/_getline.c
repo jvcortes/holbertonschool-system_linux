@@ -43,7 +43,7 @@ char *_getline(const int fd)
 
 	while (buf[i])
 	{
-		if (buf[j] != '\n')
+		if (buf[j] != '\n' && buf[j] != '\0')
 			line[b++] = buf[j++];
 		else
 			break;

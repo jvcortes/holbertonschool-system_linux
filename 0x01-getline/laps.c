@@ -55,6 +55,7 @@ void race_state(int *id, size_t size)
 		free(cars);
 		return;
 	}
+	quick_sort(cars, sz);
 	printf("Race state:\n");
 	for (i = 0; i < (int) sz; i++)
 		printf("Car %d [%d laps]\n", cars[i].id, cars[i].laps);
@@ -140,7 +141,6 @@ void add(Car **cars, int size, int *ids, int ids_size)
 		(*cars)[i].laps = 0;
 		printf("Car %d joined the race\n", (*cars)[i].id);
 	}
-	quick_sort(*cars, size + ids_size);
 	free(oc);
 }
 

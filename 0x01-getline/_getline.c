@@ -56,7 +56,7 @@ char *_getline(const int fd)
 		if (b == m)
 		{
 			m += 256;
-			line = extend(line, b, m);
+			line = extend(line, m);
 		}
 		if (j == READ_SIZE)
 		{

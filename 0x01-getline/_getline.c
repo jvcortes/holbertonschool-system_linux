@@ -35,6 +35,8 @@ char *_getline(const int fd)
 		return (NULL);
 
 	line = emalloc(m * sizeof(char));
+	if (line == NULL)
+		return (NULL);
 	memset(line, '\0', m);
 	if (buf[i] == '\0')
 	{
@@ -57,6 +59,8 @@ char *_getline(const int fd)
 		{
 			m += 256;
 			line = extend(line, m);
+			if (line == NULL)
+				return (NULL);
 		}
 		if (j == READ_SIZE)
 		{

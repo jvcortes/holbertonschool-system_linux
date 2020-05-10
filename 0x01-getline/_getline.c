@@ -24,7 +24,7 @@ int next(const int fd, char buf[], char *line);
  */
 char *_getline(const int fd)
 {
-	static int file, i;
+	static int file, i, e;
 	int j = i, b = 0, m = 256;
 	static char buf[READ_SIZE];
 	char *line;
@@ -32,6 +32,8 @@ char *_getline(const int fd)
 	if (file == 0)
 		file = fd;
 	if (file != fd)
+		return (NULL);
+	if (e)
 		return (NULL);
 
 	line = emalloc(m * sizeof(char));
@@ -75,6 +77,7 @@ char *_getline(const int fd)
 		switch (next(file, buf, line))
 		{
 			case 0:
+				e = 1;
 				return (line);
 			case -1:
 				return (NULL);

@@ -54,7 +54,8 @@ char *_getline(const int fd)
 	memset(line, '\0', m);
 	if (file->buf[file->index] == '\0')
 	{
-		switch (next(file->fd, file->buf, line))
+		file->k = next(file->fd, file->buf, line);
+		switch (file->k)
 		{
 			case 0:
 				remove_file(&files, &size, fd);
@@ -62,12 +63,12 @@ char *_getline(const int fd)
 				return (NULL);
 			case -1:
 				return (NULL);
-			case 1:
+			default:
 				file->index = 0;
 		}
 	}
 
-	while (file->buf[j] != '\n' && file->buf[j] != '\0')
+	while (file->buf[j] != '\n')
 	{
 		line[b++] = file->buf[j++];
 		if (b == m)
@@ -77,24 +78,32 @@ char *_getline(const int fd)
 			if (line == NULL)
 				return (NULL);
 		}
-		if (j == READ_SIZE)
+		if (j == file->k)
 		{
-			if (next(file->fd, file->buf, line) < 0)
-				return (NULL);
+			file->k = next(file->fd, file->buf, line);
+			switch (file->k)
+			{
+				case 0:
+					file->status = 1;
+					return (line);
+				case -1:
+					return (NULL);
+			}
 			file->index = j = 0;
 		}
 	}
 	if ((READ_SIZE == 1 && file->buf[j] == '\n') ||
 			(j == READ_SIZE - 1 && file->buf[j] == '\n'))
 	{
-		switch (next(file->fd, file->buf, line))
+		file->k = next(file->fd, file->buf, line);
+		switch (file->k)
 		{
 			case 0:
 				file->status = 1;
 				return (line);
 			case -1:
 				return (NULL);
-			case 1:
+			default:
 				file->index = 0;
 		}
 	}
@@ -175,7 +184,7 @@ int next(const int fd, char buf[], char *line)
 		free(line);
 		return (-1);
 	}
-	return (1);
+	return (s);
 }
 
 /**
@@ -211,6 +220,7 @@ int search_or_add(File **files, size_t *size, const int fd)
 		(*files)[i].fd = fd;
 		(*files)[i].status = 0;
 		(*files)[i].index = 0;
+		(*files)[i].k = 0;
 		memset((*files)[i].buf, '\0', READ_SIZE);
 		*size += 1;
 		free(of);
@@ -224,6 +234,7 @@ int search_or_add(File **files, size_t *size, const int fd)
 		(*files)[i].fd = fd;
 		(*files)[i].status = 0;
 		(*files)[i].index = 0;
+		(*files)[i].k = 0;
 		memset((*files)[i].buf, '\0', READ_SIZE);
 		*size += 1;
 	}

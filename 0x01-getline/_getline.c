@@ -6,11 +6,12 @@
 
 void *emalloc(size_t size);
 void *extend(void *ptr, size_t n);
+void remove_file(File **files, size_t *size, const int fd);
 int next(const int fd, char buf[], char *line);
+int search_or_add(File **files, size_t *size, const int fd);
 
 /**
  * _getline - retrieves a line from a file.
- *
  *  _getline will return a line from a file descriptor. If the
  * function is called various times with the same file, it will return
  * the next line until eventually, all the contents of the file are read.
@@ -20,43 +21,55 @@ int next(const int fd, char buf[], char *line);
  *
  * @fd: file descriptor.
  *
- * Return: string duplicate of the obtained line.
+ * Return: obtained line.
  */
 char *_getline(const int fd)
 {
-	static int file, i, e;
-	int j = i, b = 0, m = 256;
-	static char buf[READ_SIZE];
+	static File *files;
+	static size_t size;
+	File *file;
+	int i, j, b = 0, m = 256;
 	char *line;
 
-	if (file == 0)
-		file = fd;
-	if (file != fd)
+	if (fd == -1)
+	{
+		if (size)
+		{
+			free(files);
+			files = NULL;
+			size = 0;
+		}
 		return (NULL);
-	if (e)
-		return (NULL);
+	}
 
+	i = search_or_add(&files, &size, fd);
+	if (i == -1)
+		return (NULL);
+	file = &files[i];
+
+	j = file->index;
 	line = emalloc(m * sizeof(char));
 	if (line == NULL)
 		return (NULL);
 	memset(line, '\0', m);
-	if (buf[i] == '\0')
+	if (file->buf[file->index] == '\0')
 	{
-		switch (next(file, buf, line))
+		switch (next(file->fd, file->buf, line))
 		{
 			case 0:
+				remove_file(&files, &size, fd);
 				free(line);
 				return (NULL);
 			case -1:
 				return (NULL);
 			case 1:
-				i = 0;
+				file->index = 0;
 		}
 	}
 
-	while (buf[j] != '\n' && buf[j] != '\0')
+	while (file->buf[j] != '\n' && file->buf[j] != '\0')
 	{
-		line[b++] = buf[j++];
+		line[b++] = file->buf[j++];
 		if (b == m)
 		{
 			m += 256;
@@ -66,29 +79,29 @@ char *_getline(const int fd)
 		}
 		if (j == READ_SIZE)
 		{
-			if (next(file, buf, line) < 0)
+			if (next(file->fd, file->buf, line) < 0)
 				return (NULL);
-			i = j = 0;
+			file->index = j = 0;
 		}
 	}
-	if ((READ_SIZE == 1 && buf[j] == '\n') ||
-			(j == READ_SIZE - 1 && buf[j] == '\n'))
+	if ((READ_SIZE == 1 && file->buf[j] == '\n') ||
+			(j == READ_SIZE - 1 && file->buf[j] == '\n'))
 	{
-		switch (next(file, buf, line))
+		switch (next(file->fd, file->buf, line))
 		{
 			case 0:
-				e = 1;
+				file->status = 1;
 				return (line);
 			case -1:
 				return (NULL);
 			case 1:
-				i = 0;
+				file->index = 0;
 		}
 	}
-	else if (READ_SIZE > 1 && buf[0] == '\n')
-		i++;
+	else if (READ_SIZE > 1 && file->index == 0 && file->buf[0] == '\n')
+		file->index++;
 	else
-		i = j + 1;
+		file->index = j + 1;
 
 	return (line);
 }
@@ -163,4 +176,104 @@ int next(const int fd, char buf[], char *line)
 		return (-1);
 	}
 	return (1);
+}
+
+/**
+ * search_or_add - looks for the index of a File struct.
+ *
+ * search_or_add will look for the File struct in the files array, if it is
+ * associated with fd.  If no File is found, it will be created.
+ *
+ * @files: array of files.
+ * @size: size of the files array.
+ * @fd: file descriptor to search.
+ *
+ * Return: size of the resulting array. If memory allocation fails, the
+ * function will return -1.
+ */
+int search_or_add(File **files, size_t *size, const int fd)
+{
+	File *of = *files;
+	int i = 0;
+
+	if (*files != NULL)
+	{
+		for (i = 0; i < (int) *size; i++)
+			if ((*files)[i].fd == fd)
+				return (i);
+
+		*files = emalloc((*size + 1) * sizeof(File));
+		if (*files == NULL)
+			return (-1);
+
+		for (i = 0; i < (int) *size; i++)
+			(*files)[i] = of[i];
+		(*files)[i].fd = fd;
+		(*files)[i].status = 0;
+		(*files)[i].index = 0;
+		memset((*files)[i].buf, '\0', READ_SIZE);
+		*size += 1;
+		free(of);
+	}
+	else
+	{
+		*files = emalloc((*size + 1) * sizeof(File));
+		if (*files == NULL)
+			return (-1);
+
+		(*files)[i].fd = fd;
+		(*files)[i].status = 0;
+		(*files)[i].index = 0;
+		memset((*files)[i].buf, '\0', READ_SIZE);
+		*size += 1;
+	}
+
+	return (i);
+}
+
+/**
+ * remove_file - removes a File struct from a array of Files.
+ *
+ * If no file assocated with the file descriptor fd. No operations
+ * will be performed.
+ *
+ * @files: array of files.
+ * @size: size of the files array.
+ * @fd: file descriptor, used to search the file to delete.
+ *
+ * Return: nothing.
+ */
+void remove_file(File **files, size_t *size, const int fd)
+{
+	File *of = *files;
+	size_t osz;
+	int i = 0, j = 0, del = -1;
+
+	if (*files != NULL)
+	{
+		for (i = 0; i < (int) *size; i++)
+			if ((*files)[i].fd == fd)
+			{
+				del = i;
+				break;
+			}
+		if (del == -1)
+			return;
+
+		if (*size - 1 == 0)
+		{
+			files = NULL;
+			return;
+		}
+		osz = *size;
+		*files = emalloc((*size - 1) * sizeof(File));
+		if (*files == NULL)
+			return;
+
+		for (i = 0; i < (int) osz; i++)
+			if (of[i].fd != of[del].fd)
+				(*files)[j++] = of[i];
+		*size -= 1;
+		free(of);
+	}
 }

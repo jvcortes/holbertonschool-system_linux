@@ -52,7 +52,7 @@ char *_getline(const int fd)
 	if (line == NULL)
 		return (NULL);
 	memset(line, '\0', m);
-	if (file->buf[file->index] == '\0')
+	if (file->k == 0 || file->status == 1)
 	{
 		file->k = next(file->fd, file->buf, line);
 		switch (file->k)
@@ -93,7 +93,7 @@ char *_getline(const int fd)
 		}
 	}
 	if ((READ_SIZE == 1 && file->buf[j] == '\n') ||
-			(j == READ_SIZE - 1 && file->buf[j] == '\n'))
+			(j == file->k - 1 && file->buf[j] == '\n'))
 	{
 		file->k = next(file->fd, file->buf, line);
 		switch (file->k)
